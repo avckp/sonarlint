@@ -22,11 +22,26 @@ childProcess.stdout.on( 'data', function ( data ) {
     const output = data.toString();
 
     let match;
-
+    let exitNow = false;
     process.stdout.write( output );
-
-    if( match = /^.*(\d) critical.*$/gm.exec( output ) ) {
-        exitCode = match[ 1 ];
+    //`const regex = /^.* (([\d]+) critical| ([\d]+) blocker).*$/gm;
+    //const regex = /^.*([\d]+) critical.*$|^.* ([\d]+) blocker.*$/gm;
+    const regex = /^.* ([\d]+) (?:blocker|critical).*$/gm;
+    var matches = [];
+    while( (match = regex.exec( output ))!==null ) {
+    if (match.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+    //if( match = /^.* ([\d]+) critical.*$|^.* ([\d]+) blocker.*$/gm.exec( output ) ) {
+    matches.push(match);
+    exitNow = true;
+    }
+    if(exitNow) {
+    console.log(matches);
+    matches.forEach(function(matched){
+        if(matched[1]) exitCode += parseInt(matched[1])
+    })
+    console.log(exitCode)
     }
 } );
 
